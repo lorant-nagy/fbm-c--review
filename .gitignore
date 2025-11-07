@@ -1,0 +1,12 @@
+*.out
+data/
+notebooks/
+__pycache__/
+*.pyc
+*.pyo
+.vscode/
+.DS_Store
+
+
+
+
