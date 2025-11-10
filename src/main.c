@@ -2,17 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../include/fbm.h"
+#include <sys/stat.h>
+#include <sys/types.h>
+#include "../include/fbm_patched.h"
 
 int main(void) {
     
     srand((unsigned)time(NULL));
 
-    char filename[50];
+    char filename[100];
 
-    int target_path_count = 5;
+    int target_path_count = 1000;
 
-    double H = 0.7;
+    double H = 0.8;
     int    n = 128;
     double T = 128.0;
     int counter = 1;
@@ -27,9 +29,21 @@ int main(void) {
     while (counter <= target_path_count) {
         
         path = simulate_fBm(H, n, T);
-        // Save full path to CSV (columns: t, B_H(t))
-        // create a variable holding the file name
-        sprintf(filename, "data/fbm_%d.csv", counter);
+        char dir[100];
+        sprintf(dir, "data/fbm_H%0.1f_T%0.1f_n%d", H, T, n);
+        
+        // Create directory if it doesn't exist
+        struct stat st = {0};
+        if (stat(dir, &st) == -1) {
+            if (mkdir(dir, 0755) != 0) {
+                perror("mkdir");
+                free(path);
+                free(times);
+                return 1;
+            }
+        }
+        
+        sprintf(filename, "data/fbm_H%0.1f_T%0.1f_n%d/fbm_%d.csv", H, T, n, counter);
         FILE *fp = fopen(filename, "w");
         if (!fp) { perror("fopen"); free(path); free(times); return 1; }
         fprintf(fp, "t,BH\n");
